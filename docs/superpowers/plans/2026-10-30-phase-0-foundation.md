@@ -21,7 +21,7 @@
 - Phase 0 uses a JDBC catalog. The swap to Polaris or Lakekeeper is phase 3.
 - Never use a `latest` image tag. Pin every image and Maven package version in `.env.example`.
 - Version pins below are a starting point from memory. Before pinning, confirm each one exists (context7 or Docker Hub/Maven Central): Spark `3.5.6`, Iceberg `1.9.2` (`iceberg-spark-runtime-3.5_2.12`, `iceberg-aws-bundle`), Postgres JDBC `42.7.4`, `postgres:16`.
-- MinIO stopped publishing community images in late 2025 (from memory, so verify). Pin the newest `minio/minio` tag that still exists. If none can be pulled, swap to SeaweedFS's S3 gateway, as the spec allows.
+- **Ruling (2026-10-30): SeaweedFS replaces MinIO.** `minio/minio` returns 404 on Docker Hub and has no tags on Quay, so the spec's fallback applies. SeaweedFS (`chrislusf/seaweedfs:4.48`) serves S3 on port 8333. Credentials are `S3_ACCESS_KEY` and `S3_SECRET_KEY`, and buckets are created with `weed shell`. Wherever this plan says `minio`, `minio-init`, `mc` or port 9000, read `seaweedfs`, `seaweedfs-init`, `weed shell` and 8333. Verified pins: Spark `3.5.7-python3`, Iceberg `1.12.0`, Postgres JDBC `42.7.14`, `postgres:16.15`.
 - Python dependencies only through uv (`pyproject.toml` and `uv.lock`).
 - Credentials only in `.env`, which git ignores. `.env.example` holds safe local defaults.
 - The README carries the unofficial, non-commercial fan-project disclaimer from day one.
@@ -166,35 +166,35 @@ git commit -m "chore: repo skeleton, settings module and WSL location guard"
   - Buckets `warehouse` and `landing`
   - The Make variable `SPARK_SUBMIT`, which is `docker compose exec spark /opt/spark/bin/spark-submit --master local[2] --driver-memory 2g --conf spark.jars.ivy=/opt/ivy --packages $(ICEBERG_PACKAGES)`. Task 3 uses it.
 
-- [ ] **Step 1: Write the failing tests** in `tests/unit/test_compose.py`. They load `docker-compose.yml` with pyyaml.
+- [x] **Step 1: Write the failing tests** in `tests/unit/test_compose.py`. They load `docker-compose.yml` with pyyaml.
   - `test_every_service_has_mem_limit`: every service has a `mem_limit` key.
   - `test_no_image_uses_latest_tag`: no `image` value ends in `:latest` or has no tag. A `${VAR}` reference counts as pinned, and the test asserts that `VAR` is present in `.env.example`.
   - `test_spark_only_in_profiles`: the `spark` service has `profiles` equal to `["batch", "streaming"]`, and `minio` and `postgres` have no profiles.
   - `test_env_file_is_gitignored`: `.env` is a line in `.gitignore`.
 
-- [ ] **Step 2: Run them and see them fail.** Run `uv run pytest tests/unit/test_compose.py -v`. Expected: FAIL, because the file is missing.
+- [x] **Step 2: Run them and see them fail.** Run `uv run pytest tests/unit/test_compose.py -v`. Expected: FAIL, because the file is missing.
 
-- [ ] **Step 3: Pin the versions.** Confirm each tag and version exists (Global Constraints), then add `SPARK_IMAGE`, `MINIO_IMAGE`, `MC_IMAGE`, `POSTGRES_IMAGE`, `ICEBERG_VERSION` and `PG_JDBC_VERSION` to `.env.example`.
+- [x] **Step 3: Pin the versions.** Confirm each tag and version exists (Global Constraints), then add `SPARK_IMAGE`, `MINIO_IMAGE`, `MC_IMAGE`, `POSTGRES_IMAGE`, `ICEBERG_VERSION` and `PG_JDBC_VERSION` to `.env.example`.
 
-- [ ] **Step 4: Write `docker-compose.yml` and `infra/postgres/init.sql`.**
+- [x] **Step 4: Write `docker-compose.yml` and `infra/postgres/init.sql`.**
   - `minio`: `server /data --console-address :9001`, a named volume, healthcheck `mc ready local`, `mem_limit: 512m`.
   - `minio-init`: depends on `minio` being healthy; runs `mc alias set` and then `mc mb --ignore-existing local/warehouse local/landing`. `--ignore-existing` is what makes a restart safe (Review Focus 2).
   - `postgres`: a named volume, `init.sql` mounted into `/docker-entrypoint-initdb.d/`, healthcheck `pg_isready`, `mem_limit: 512m`. `init.sql` runs `CREATE DATABASE iceberg_catalog;` and `CREATE DATABASE airflow;`.
   - `spark`: runs `sleep infinity` and `mem_limit: 3g`. Add the comment `# shortcut: local[2] in one container, no standalone master/worker; upgrade when streaming and batch must run together`.
 
-- [ ] **Step 5: Add the Make targets.**
+- [x] **Step 5: Add the Make targets.**
   - `up`: `docker compose --profile batch up -d --wait`
   - `down`: `docker compose --profile batch down` (keeps volumes)
   - `ps`
   - `stats`: `docker stats --no-stream`
   - `compose-config`: `docker compose --profile batch config -q`, and `check` now includes it
 
-- [ ] **Step 6: Run the tests and bring the stack up.**
+- [x] **Step 6: Run the tests and bring the stack up.**
 Run: `make check && cp -n .env.example .env && make up && make ps`
 Expected: tests pass; `minio` and `postgres` are healthy, `spark` is running, and `minio-init` has exited 0. Open http://localhost:9001 and you see both buckets.
 Run `make down && make up` a second time. Expected: it succeeds again.
 
-- [ ] **Step 7: Commit.**
+- [x] **Step 7: Commit.**
 ```bash
 git add -A && git commit -m "feat: compose stack with MinIO, JDBC catalog Postgres and Spark"
 ```

@@ -28,9 +28,9 @@ def _required(env: Mapping[str, str], name: str) -> str:
 
 def load_settings(env: Mapping[str, str] = os.environ) -> Settings:
     return Settings(
-        s3_endpoint=env.get("S3_ENDPOINT", "http://localhost:9000"),
-        s3_access_key=_required(env, "MINIO_ROOT_USER"),
-        s3_secret_key=_required(env, "MINIO_ROOT_PASSWORD"),
+        s3_endpoint=env.get("S3_ENDPOINT", "http://localhost:8333"),
+        s3_access_key=_required(env, "S3_ACCESS_KEY"),
+        s3_secret_key=_required(env, "S3_SECRET_KEY"),
         pg_host=env.get("PG_HOST", "localhost"),
         # 5433 on the host: the content-intelligence pipeline already holds 5432.
         pg_port=int(env.get("PG_PORT", "5433")),

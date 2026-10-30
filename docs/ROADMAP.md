@@ -10,10 +10,12 @@ Spec: [`docs/project-plan.md`](project-plan.md) (moved from the repo root in pha
 | --- | --- |
 | Current phase | 0 Foundation |
 | Current plan | `docs/superpowers/plans/2026-10-30-phase-0-foundation.md` |
-| Current task | Tasks 0 and 1 done (2026-10-30). Task 2 not started |
-| Last green commit | Task 1 commit: `chore: repo skeleton, settings module and WSL location guard` (`make check`: 6 passed) |
+| Current task | Tasks 0, 1 and 2 done (2026-10-30). Task 3 not started |
+| Last green commit | Task 2 commit: `feat: compose stack with SeaweedFS, JDBC catalog Postgres and Spark` (`make check`: 10 passed; `make up` healthy twice) |
 | Blockers | none |
-| Next action | Task 2, step 1 (stop the content-intelligence pipeline before `make up`) |
+| Next action | Task 3, step 1 (stop the content-intelligence pipeline before `make up`) |
+
+Storage change: MinIO images are gone from Docker Hub (404, checked 2026-10-30), so SeaweedFS serves S3 at `http://localhost:8333` (filer UI at http://localhost:8888). The spec still says MinIO; its fallback clause covers this.
 
 Known issue: on 2026-10-30, Docker Desktop's engine crashed (`wsl.exe -d docker-desktop` exit `0xc00000fd`) after about 50 minutes, and choosing "Quit" in the recovery dialog closed Docker. Fix: `wsl --shutdown`, then reopen Docker Desktop. If it keeps happening, run `wsl --update` and pick "Restart" in that dialog, not "Quit". Docker server 29.9.2, WSL 2.7.11.
 
