@@ -17,17 +17,17 @@ Spec: [`docs/project-plan.md`](project-plan.md) (moved from the repo root in pha
 
 Known issue: on 2026-10-30, Docker Desktop's engine crashed (`wsl.exe -d docker-desktop` exit `0xc00000fd`) after about 50 minutes, and choosing "Quit" in the recovery dialog closed Docker. Fix: `wsl --shutdown`, then reopen Docker Desktop. If it keeps happening, run `wsl --update` and pick "Restart" in that dialog, not "Quit". Docker server 29.9.2, WSL 2.7.11.
 
-Repo location: `/root/f1-open-lakehouse` (Ubuntu's default user is root). The Windows copy is kept until Task 1 is committed, then deleted.
+Repo location: this Windows folder, `C:\Users\surbh\Documents\Project work\Data engineering\f1-open-lakehouse`. It is the only working copy (the user's decision on 2026-10-30). Run commands from Ubuntu: open Ubuntu, then `cd "/mnt/c/Users/surbh/Documents/Project work/Data engineering/f1-open-lakehouse"`. The Python venv lives in `~/.venvs/f1lake` inside Ubuntu.
 
 ## How to resume after an interruption
 
-Run these in order, from the Ubuntu (WSL) shell inside the repo:
+Run these in order, from the Ubuntu (WSL) shell in the repo folder (path above):
 
 1. `git status` and `git log --oneline -5`. Uncommitted changes belong to the task named above; finish or discard them before anything else.
 2. Read the **Resume here** block above, then open the current plan and find the first unticked `- [ ]` step.
-3. `make check` confirms the repo is sane (location guard, compose config, unit tests). From task 2 on, `make up` and then `make smoke` also confirm the stack and lake still work.
+3. `make check` confirms the repo is sane (lint and unit tests; compose config from task 2). From task 2 on, `make up` and then `make smoke` also confirm the stack and lake still work.
 4. Continue at the first unticked step. Each task is self-contained and ends in its own commit, so a half-done task is redone from its step 1. Every script in this repo is safe to re-run.
-5. If you are resuming with Claude Code: start it from the repo in WSL and say "resume from docs/ROADMAP.md". For a long break, `/context-save` before stopping and `/context-restore` after.
+5. If you are resuming with Claude Code: start it in this Windows folder and say "resume from docs/ROADMAP.md". For a long break, `/context-save` before stopping and `/context-restore` after.
 
 **Rules that keep resuming cheap:**
 - One commit per task, and that commit also ticks the plan's checkboxes and updates the block above.

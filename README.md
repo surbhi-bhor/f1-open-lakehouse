@@ -6,11 +6,11 @@ A local, open-source lakehouse for Formula 1 data: Apache Iceberg tables on MinI
 
 ## Quick start
 
-Requires WSL2 (keep the repo inside the WSL filesystem, not under `/mnt/c`), Docker Desktop with WSL integration, `make` and [uv](https://docs.astral.sh/uv/).
+Requires Docker Desktop with WSL integration, and `make` and [uv](https://docs.astral.sh/uv/) inside WSL2 Ubuntu. Run every command from Ubuntu in the repo folder (for example `/mnt/c/.../f1-open-lakehouse`).
 
 ```bash
 cp .env.example .env
-make check   # location guard, lint, unit tests
+make check   # lint, unit tests
 make up      # start the stack (added in phase 0, task 2)
 make smoke   # Spark writes an Iceberg table, DuckDB reads it (phase 0, task 3)
 ```

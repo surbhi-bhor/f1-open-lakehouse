@@ -1,7 +1,7 @@
-.PHONY: guard lint test check
+.PHONY: lint test check
 
-guard:
-	@bash scripts/guard_location.sh "$(CURDIR)"
+# The repo sits on the Windows drive; a Linux venv inside it breaks, so keep it in WSL's home.
+export UV_PROJECT_ENVIRONMENT ?= $(HOME)/.venvs/f1lake
 
 lint:
 	uv run ruff check .
@@ -9,4 +9,4 @@ lint:
 test:
 	uv run pytest
 
-check: guard lint test
+check: lint test

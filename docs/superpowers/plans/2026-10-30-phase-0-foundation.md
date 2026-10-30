@@ -14,7 +14,8 @@
 
 - Everything is free and open source. No cloud accounts.
 - One command starts the environment: `make up`.
-- Run through WSL2 and Docker Desktop, with the repo inside the WSL filesystem, never under `/mnt/c`.
+- The repo lives in the Windows folder `C:\Users\surbh\Documents\Project work\Data engineering\f1-open-lakehouse` (the user's decision, overriding the spec's "keep it inside WSL"). Commands (`make`, `uv`, `docker`) run from Ubuntu (WSL2) in `/mnt/c/Users/surbh/Documents/Project work/Data engineering/f1-open-lakehouse`. The uv venv lives outside the folder in `~/.venvs/f1lake`, because a Linux venv inside a Windows folder breaks. Lake data stays in Docker named volumes, so only code reads pay the `/mnt/c` slowdown.
+- Text files are LF (`.gitattributes`), so bash scripts still run in Linux containers if Windows git touches them.
 - The 16 GB profile applies: Compose profiles (`batch`, `streaming`, `serving`) start in groups, never all together. Phase 0 only uses `batch`.
 - Every Compose service has a `mem_limit`. Phase 0 total budget: about 4.5 GB (MinIO 512m, Postgres 512m, Spark 3g).
 - Phase 0 uses a JDBC catalog. The swap to Polaris or Lakekeeper is phase 3.
@@ -32,7 +33,7 @@
 2. **Restarting the stack keeps the data, and the bucket init is safe to re-run.** `make down && make up` must not lose the table or fail on existing buckets. Task 3 test `test_survives_restart`, plus `--ignore-existing` in Task 2.
 3. **A service without a memory cap can starve WSL and freeze the laptop.** Task 2 test `test_every_service_has_mem_limit`.
 4. **A missing secret must fail loudly, not connect with an empty password.** Task 1 test `test_load_settings_missing_secret_raises`.
-5. **A repo under `/mnt/c` silently runs 5 to 10 times slower.** Task 1 `make guard` and test `test_guard_rejects_mnt_c`.
+5. **Windows CRLF line endings break bash scripts and Makefiles in Linux.** `.gitattributes` forces LF, and the test `test_gitattributes_forces_lf` pins it (added after Task 1, when the repo moved back to the Windows folder; the location guard was removed then).
 
 ---
 
@@ -59,7 +60,7 @@ cp -r "/mnt/c/Users/surbh/Documents/Project work/Data engineering/f1-open-lakeho
 cd ~/f1-open-lakehouse && git status
 ```
 Expected: the same untracked files as on Windows. Keep the Windows copy until Task 1 is committed, then delete it, so there is only one working copy.
-Note: Claude Code's project memory is keyed by path. Start new sessions from `~/f1-open-lakehouse` and say "resume from docs/ROADMAP.md".
+Superseded on 2026-10-30: the user chose to keep the repo in the Windows folder. The Task 1 commit was pulled back there, and the WSL copy is no longer used.
 
 - [x] **Step 4: Install the tooling in Ubuntu.**
 ```bash
@@ -282,7 +283,6 @@ git add -A && git commit -m "feat: Spark writes and DuckDB reads the same Iceber
   - `unit`: `astral-sh/setup-uv`, `uv sync`, `make lint`, `make test`, `make compose-config`
   - `smoke` (needs `unit`): `cp .env.example .env`, `make up`, `make test-int`, then always `make down`
 
-  CI checks out to `/home/runner/...`, so the guard passes there without special-casing.
 
 - [ ] **Step 3: Verify locally that the workflow is valid YAML and the commands match.**
 Run: `uv run python -c "import yaml; yaml.safe_load(open('.github/workflows/ci.yml'))" && make check`
