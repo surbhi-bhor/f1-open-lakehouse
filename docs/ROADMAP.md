@@ -10,10 +10,10 @@ Spec: [`docs/project-plan.md`](project-plan.md) (moved from the repo root in pha
 | --- | --- |
 | Current phase | 0 Foundation |
 | Current plan | `docs/superpowers/plans/2026-10-30-phase-0-foundation.md` |
-| Current task | Task 2 redo: back to MinIO, built from source on GitHub Actions |
-| Last green commit | `fc18faa` (Task 2 on SeaweedFS). The MinIO switch is committed but not yet verified with `make up` |
-| Blockers | The `minio-image` workflow must publish `ghcr.io/surbhi-bhor/f1lake-minio` before `make up` can pull it |
-| Next action | Check the `minio-image` run on GitHub is green, then `make up`, then Task 3 |
+| Current task | Tasks 0, 1 and 2 done (2026-11-02, Task 2 on MinIO). Task 3 not started |
+| Last green commit | `c655689` (MinIO from source). `minio-image` run 41432103788 green; `make up` healthy; data survives down/up |
+| Blockers | Memory: close Chrome and Brave before Task 3. Spark needs 2 to 3 GB and headroom was 1.6 GB |
+| Next action | Task 3, step 1 |
 
 Storage: MinIO's official images and binaries are gone (Docker Hub 404, dl.min.io 410). It is built from official source by `.github/workflows/minio-image.yml` on a GitHub runner, because building it on this laptop ran Windows out of memory and crashed WSL. S3 is at `http://localhost:9000`, and the console at `http://localhost:9001`.
 
