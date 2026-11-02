@@ -1,0 +1,39 @@
+# Builds MinIO from official source on a GitHub runner (16 GB RAM) and publishes it to GHCR,
+# because MinIO Inc. stopped publishing images and the build exhausts the laptop's memory.
+name: minio-image
+
+on:
+  push:
+    branches: [main]
+    paths: [infra/minio/**, .env.example, .github/workflows/minio-image.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read pinned versions from .env.example
+        run: grep -E '^(MINIO_RELEASE|MINIO_COMMIT|MC_RELEASE|MC_COMMIT)=' .env.example >> "$GITHUB_ENV"
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: infra/minio
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/f1lake-minio:${{ env.MINIO_RELEASE }}
+          build-args: |
+            MINIO_RELEASE=${{ env.MINIO_RELEASE }}
+            MINIO_COMMIT=${{ env.MINIO_COMMIT }}
+            MC_RELEASE=${{ env.MC_RELEASE }}
+            MC_COMMIT=${{ env.MC_COMMIT }}

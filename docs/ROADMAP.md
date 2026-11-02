@@ -10,12 +10,14 @@ Spec: [`docs/project-plan.md`](project-plan.md) (moved from the repo root in pha
 | --- | --- |
 | Current phase | 0 Foundation |
 | Current plan | `docs/superpowers/plans/2026-10-30-phase-0-foundation.md` |
-| Current task | Tasks 0, 1 and 2 done (2026-10-30). Task 3 not started |
-| Last green commit | Task 2 commit: `feat: compose stack with SeaweedFS, JDBC catalog Postgres and Spark` (`make check`: 10 passed; `make up` healthy twice) |
-| Blockers | none |
-| Next action | Task 3, step 1 (stop the content-intelligence pipeline before `make up`) |
+| Current task | Task 2 redo: back to MinIO, built from source on GitHub Actions |
+| Last green commit | `fc18faa` (Task 2 on SeaweedFS). The MinIO switch is committed but not yet verified with `make up` |
+| Blockers | The `minio-image` workflow must publish `ghcr.io/surbhi-bhor/f1lake-minio` before `make up` can pull it |
+| Next action | Check the `minio-image` run on GitHub is green, then `make up`, then Task 3 |
 
-Storage change: MinIO images are gone from Docker Hub (404, checked 2026-10-30), so SeaweedFS serves S3 at `http://localhost:8333` (filer UI at http://localhost:8888). The spec still says MinIO; its fallback clause covers this.
+Storage: MinIO's official images and binaries are gone (Docker Hub 404, dl.min.io 410). It is built from official source by `.github/workflows/minio-image.yml` on a GitHub runner, because building it on this laptop ran Windows out of memory and crashed WSL. S3 is at `http://localhost:9000`, and the console at `http://localhost:9001`.
+
+Memory: this laptop's commit limit (RAM plus page file, about 30 GB) runs out when browsers hold 5 GB or more. Close Chrome and Brave before `make up` or Spark jobs. Lasting fix: raise the page file (`sysdm.cpl`, custom size 16384 to 24576 MB).
 
 Known issue: on 2026-10-30, Docker Desktop's engine crashed (`wsl.exe -d docker-desktop` exit `0xc00000fd`) after about 50 minutes, and choosing "Quit" in the recovery dialog closed Docker. Fix: `wsl --shutdown`, then reopen Docker Desktop. If it keeps happening, run `wsl --update` and pick "Restart" in that dialog, not "Quit". Docker server 29.9.2, WSL 2.7.11.
 
