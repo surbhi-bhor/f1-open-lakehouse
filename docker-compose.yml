@@ -61,6 +61,8 @@ services:
     # Root so the named Ivy cache volume is writable; local-only container.
     user: root
     entrypoint: ["sleep", "infinity"]
+    # tini as PID 1 forwards SIGTERM; bare `sleep` ignores it and gets SIGKILLed (exit 137) after 10s.
+    init: true
     environment:
       S3_ACCESS_KEY: ${S3_ACCESS_KEY}
       S3_SECRET_KEY: ${S3_SECRET_KEY}
