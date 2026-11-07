@@ -277,14 +277,14 @@ git add -A && git commit -m "feat: Spark writes and DuckDB reads the same Iceber
 **Interfaces:**
 - Consumes: the Make targets `check`, `up`, `test-int` and `down`.
 
-- [ ] **Step 1: Measure memory.** Run `make up`, then `make stats` three times: idle, during `make smoke-write` (from a second shell), and right after it. Record each service's MEM USAGE and the machine's free RAM (`free -h` in WSL) in `docs/benchmarks/phase0-memory.md`, along with the date, the machine facts from the ROADMAP and the exact commands. Report the measured values only. If any service sits within 10% of its `mem_limit`, raise that limit and note why.
+- [x] **Step 1: Measure memory.** Run `make up`, then `make stats` three times: idle, during `make smoke-write` (from a second shell), and right after it. Record each service's MEM USAGE and the machine's free RAM (`free -h` in WSL) in `docs/benchmarks/phase0-memory.md`, along with the date, the machine facts from the ROADMAP and the exact commands. Report the measured values only. If any service sits within 10% of its `mem_limit`, raise that limit and note why.
 
-- [ ] **Step 2: Write `.github/workflows/ci.yml`.** Trigger on push and pull_request to `main`. Two jobs:
+- [x] **Step 2: Write `.github/workflows/ci.yml`.** Trigger on push and pull_request to `main`. Two jobs:
   - `unit`: `astral-sh/setup-uv`, `uv sync`, `make lint`, `make test`, `make compose-config`
   - `smoke` (needs `unit`): `cp .env.example .env`, `make up`, `make test-int`, then always `make down`
 
 
-- [ ] **Step 3: Verify locally that the workflow is valid YAML and the commands match.**
+- [x] **Step 3: Verify locally that the workflow is valid YAML and the commands match.**
 Run: `uv run python -c "import yaml; yaml.safe_load(open('.github/workflows/ci.yml'))" && make check`
 Expected: no error.
 

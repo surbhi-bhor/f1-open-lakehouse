@@ -8,12 +8,12 @@ Spec: [`docs/project-plan.md`](project-plan.md) (moved from the repo root in pha
 
 | Field | Value |
 | --- | --- |
-| Current phase | 0 Foundation |
+| Current phase | 0 Foundation: all tasks done, gate waits on the first green `ci` run |
 | Current plan | `docs/superpowers/plans/2026-10-30-phase-0-foundation.md` |
-| Current task | Tasks 0 to 3 done (2026-11-07: Spark writes, DuckDB reads `lake.bronze.smoke_drivers`). Task 4 not started |
-| Last green commit | Task 3 commit ("Spark writes and DuckDB reads the same Iceberg table"). `make check` 11 passed; `make test-int` 3 passed; `make smoke` prints the three rows |
-| Blockers | Memory: close Chrome and Brave and stop the content pipeline before `make up` or Spark jobs |
-| Next action | Task 4, step 1 (measure memory) |
+| Current task | Tasks 0 to 4 done (2026-11-07). Memory in `docs/benchmarks/phase0-memory.md`; `.github/workflows/ci.yml` added |
+| Last green commit | Task 4 commit ("ci: lint, unit and compose smoke; record phase 0 memory"), green locally: `make check` 11 passed, `make test-int` 3 passed |
+| Blockers | Push to GitHub and confirm both `ci` jobs pass (the phase 0 gate). WSL sees only 6.8 GiB, not the 10 GB in `.wslconfig`; check this before phase 1 |
+| Next action | Phase 1: write the plan (brainstorming, then writing-plans), once CI is green |
 
 Storage: MinIO's official images and binaries are gone (Docker Hub 404, dl.min.io 410). It is built from official source by `.github/workflows/minio-image.yml` on a GitHub runner, because building it on this laptop ran Windows out of memory and crashed WSL. S3 is at `http://localhost:9000`, and the console at `http://localhost:9001`.
 
@@ -44,7 +44,7 @@ Every phase ends with a gate. Do not start the next phase until its gate passes.
 
 | Phase | Status | Plan file | Exit gate (from the spec) |
 | --- | --- | --- | --- |
-| 0 Foundation | not started | `plans/2026-10-30-phase-0-foundation.md` | One Iceberg table written by Spark and read by DuckDB; memory measured with docker stats; CI green |
+| 0 Foundation | done locally; CI gate pending | `plans/2026-10-30-phase-0-foundation.md` | One Iceberg table written by Spark and read by DuckDB; memory measured with docker stats; CI green |
 | 1 Batch backfill, dimensions | not planned | to write after gate 0 | Several seasons in bronze through an Airflow backfill; SCD2 dims; versioned fact_race_result; dbt tests pass; one time-travel query on a corrected result |
 | 2 Streaming | not planned | to write after gate 1 | Recorded session replayed into Redpanda; Structured Streaming writes fact_lap, fact_position, fact_race_control_event with a watermark; small files visible |
 | 3 Maintenance, multi-engine | not planned | to write after gate 2 | f1_table_maintenance DAG; partition evolution; DuckDB reads; benchmark report; catalog swapped to Polaris or Lakekeeper if stable |
