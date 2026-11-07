@@ -1,5 +1,8 @@
 """Connection settings shared by every engine, so Spark and DuckDB cannot drift apart."""
 
+# The Spark image runs Python 3.8, where Mapping[str, str] and dict[str, str] fail at import.
+from __future__ import annotations
+
 import os
 from collections.abc import Mapping
 from dataclasses import dataclass

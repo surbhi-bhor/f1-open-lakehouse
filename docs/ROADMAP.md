@@ -10,10 +10,10 @@ Spec: [`docs/project-plan.md`](project-plan.md) (moved from the repo root in pha
 | --- | --- |
 | Current phase | 0 Foundation |
 | Current plan | `docs/superpowers/plans/2026-10-30-phase-0-foundation.md` |
-| Current task | Tasks 0, 1 and 2 done (2026-11-02, Task 2 on MinIO). Task 3 not started |
-| Last green commit | `c655689` (MinIO from source). `minio-image` run 41432103788 green; `make up` healthy; data survives down/up |
-| Blockers | Memory: close Chrome and Brave before Task 3. Spark needs 2 to 3 GB and headroom was 1.6 GB |
-| Next action | Task 3, step 1 |
+| Current task | Tasks 0 to 3 done (2026-11-07: Spark writes, DuckDB reads `lake.bronze.smoke_drivers`). Task 4 not started |
+| Last green commit | Task 3 commit ("Spark writes and DuckDB reads the same Iceberg table"). `make check` 11 passed; `make test-int` 3 passed; `make smoke` prints the three rows |
+| Blockers | Memory: close Chrome and Brave and stop the content pipeline before `make up` or Spark jobs |
+| Next action | Task 4, step 1 (measure memory) |
 
 Storage: MinIO's official images and binaries are gone (Docker Hub 404, dl.min.io 410). It is built from official source by `.github/workflows/minio-image.yml` on a GitHub runner, because building it on this laptop ran Windows out of memory and crashed WSL. S3 is at `http://localhost:9000`, and the console at `http://localhost:9001`.
 

@@ -21,7 +21,7 @@
 - Phase 0 uses a JDBC catalog. The swap to Polaris or Lakekeeper is phase 3.
 - Never use a `latest` image tag. Pin every image and Maven package version in `.env.example`.
 - Version pins below are a starting point from memory. Before pinning, confirm each one exists (context7 or Docker Hub/Maven Central): Spark `3.5.6`, Iceberg `1.9.2` (`iceberg-spark-runtime-3.5_2.12`, `iceberg-aws-bundle`), Postgres JDBC `42.7.4`, `postgres:16`.
-- **Ruling (2026-11-02): MinIO is built from official source, on GitHub.** MinIO Inc. withdrew its images (Docker Hub 404) and binaries (dl.min.io 410). The user chose MinIO over the SeaweedFS fallback, and chose official source over the `pgsty` fork and `bitnamilegacy`. `infra/minio/Dockerfile` builds MinIO `RELEASE.2025-10-15T17-29-55Z` and mc `RELEASE.2025-08-13T08-35-41Z`, and the build checks each commit SHA. Building on the laptop exhausted Windows memory and crashed WSL, so `.github/workflows/minio-image.yml` builds on a GitHub runner and publishes `ghcr.io/surbhi-bhor/f1lake-minio:<release>`, and the laptop only pulls it. Credentials are `S3_ACCESS_KEY` and `S3_SECRET_KEY` (mapped to `MINIO_ROOT_USER` and `MINIO_ROOT_PASSWORD`). Verified pins: Spark `3.5.7-python3`, Iceberg `1.12.0`, Postgres JDBC `42.7.14`, `postgres:16.15`.
+- **Ruling (2026-11-02): MinIO is built from official source, on GitHub.** MinIO Inc. withdrew its images (Docker Hub 404) and binaries (dl.min.io 410). The user chose MinIO over the SeaweedFS fallback, and chose official source over the `pgsty` fork and `bitnamilegacy`. `infra/minio/Dockerfile` builds MinIO `RELEASE.2025-10-15T17-29-55Z` and mc `RELEASE.2025-08-13T08-35-41Z`, and the build checks each commit SHA. Building on the laptop exhausted Windows memory and crashed WSL, so `.github/workflows/minio-image.yml` builds on a GitHub runner and publishes `ghcr.io/surbhi-bhor/f1lake-minio:<release>`, and the laptop only pulls it. Credentials are `S3_ACCESS_KEY` and `S3_SECRET_KEY` (mapped to `MINIO_ROOT_USER` and `MINIO_ROOT_PASSWORD`). Verified pins: Spark `3.5.7-java17-python3` (Ruling 2026-11-07: Iceberg 1.12 needs Java 17, and the plain `-python3` tag ships Java 11 and Python 3.8), Iceberg `1.12.0`, Postgres JDBC `42.7.14`, `postgres:16.15`.
 - Python dependencies only through uv (`pyproject.toml` and `uv.lock`).
 - Credentials only in `.env`, which git ignores. `.env.example` holds safe local defaults.
 - The README carries the unofficial, non-commercial fan-project disclaimer from day one.
@@ -215,7 +215,7 @@ git add -A && git commit -m "feat: compose stack with MinIO, JDBC catalog Postgr
   - `f1lake.read_duckdb.metadata_location(s: Settings, namespace: str, table: str) -> str`
   - `f1lake.read_duckdb.read_table(s: Settings, namespace: str, table: str, columns: list[str]) -> list[tuple]`. Rows come back ordered by the first column.
 
-- [ ] **Step 1: Write the failing tests** in `tests/integration/test_iceberg_roundtrip.py`. Mark them `pytest.mark.integration`. A helper `write()` runs `make smoke-write` through `subprocess.run(check=True)`.
+- [x] **Step 1: Write the failing tests** in `tests/integration/test_iceberg_roundtrip.py`. Mark them `pytest.mark.integration`. A helper `write()` runs `make smoke-write` through `subprocess.run(check=True)`.
 
 ```python
 EXPECTED = [("hamilton", "HAM", 2024), ("leclerc", "LEC", 2024), ("max_verstappen", "VER", 2024)]
@@ -237,9 +237,9 @@ def test_survives_restart():
 
 On the host, `load_settings()` reads `.env`. Load it in `tests/integration/conftest.py` with a ten-line `KEY=VALUE` parser, not python-dotenv.
 
-- [ ] **Step 2: Run them and see them fail.** Run `uv run pytest -m integration -v`. Expected: FAIL, because `make smoke-write` and `f1lake.read_duckdb` are missing.
+- [x] **Step 2: Run them and see them fail.** Run `uv run pytest -m integration -v`. Expected: FAIL, because `make smoke-write` and `f1lake.read_duckdb` are missing.
 
-- [ ] **Step 3: Implement `jobs/smoke_write.py`.**
+- [x] **Step 3: Implement `jobs/smoke_write.py`.**
   - Build the SparkSession from `spark_catalog_conf(load_settings())`.
   - Run `CREATE NAMESPACE IF NOT EXISTS lake.bronze` and `CREATE TABLE IF NOT EXISTS` with the schema above.
   - Write the three EXPECTED rows with `ingested_at = current_timestamp()` using `df.writeTo("lake.bronze.smoke_drivers").overwritePartitions()`. Overwriting the whole partition is what makes the re-run idempotent, which is the spec's "overwrite a whole partition" rule.
@@ -247,7 +247,7 @@ On the host, `load_settings()` reads `.env`. Load it in `tests/integration/conft
 
   Make target `smoke-write`: `$(SPARK_SUBMIT) /opt/project/jobs/smoke_write.py`.
 
-- [ ] **Step 4: Implement `f1lake/read_duckdb.py`.**
+- [x] **Step 4: Implement `f1lake/read_duckdb.py`.**
   - `metadata_location` runs `SELECT metadata_location FROM iceberg_tables WHERE catalog_name = %s AND table_namespace = %s AND table_name = %s` against `iceberg_catalog` with psycopg. It raises `LookupError` naming the table when there is no row. Add the comment `# shortcut: reads the JDBC catalog table directly; replace with a REST catalog client when moving to Polaris/Lakekeeper in phase 3`.
   - `read_table` does three things in order:
     1. Runs `INSTALL iceberg; LOAD iceberg; INSTALL httpfs; LOAD httpfs`.
@@ -256,12 +256,12 @@ On the host, `load_settings()` reads `.env`. Load it in `tests/integration/conft
 
   Make targets: `smoke-read` (`uv run python -m f1lake.read_duckdb`, whose `__main__` prints the rows), `smoke` (smoke-write then smoke-read), and `test-int` (`uv run pytest -m integration`).
 
-- [ ] **Step 5: Run the tests and see them pass.**
+- [x] **Step 5: Run the tests and see them pass.**
 Run: `make up && make test-int`
 Expected: 3 passed. The first run downloads the Iceberg jars into the Ivy volume, which is slow once and then cached.
 If DuckDB's `iceberg_scan` rejects the metadata, check the version-hint behaviour of the DuckDB version in use with context7 before changing any code (`superpowers:systematic-debugging`).
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 ```bash
 git add -A && git commit -m "feat: Spark writes and DuckDB reads the same Iceberg table"
 ```
