@@ -288,11 +288,11 @@ git add -A && git commit -m "feat: Spark writes and DuckDB reads the same Iceber
 Run: `uv run python -c "import yaml; yaml.safe_load(open('.github/workflows/ci.yml'))" && make check`
 Expected: no error.
 
-- [ ] **Step 4: Commit and push.** First update `docs/ROADMAP.md`: set phase 0 to done, record the last green commit, and set the Resume block to "Phase 1: write the plan (brainstorming, then writing-plans)".
+- [x] **Step 4: Commit and push.** First update `docs/ROADMAP.md`: set phase 0 to done, record the last green commit, and set the Resume block to "Phase 1: write the plan (brainstorming, then writing-plans)".
 ```bash
 git add -A && git commit -m "ci: lint, unit and compose smoke; record phase 0 memory"
 ```
 Creating the GitHub repository and pushing to it is a user decision (public visibility). Then `git push -u origin main`.
 Expected: both CI jobs are green on `main`. That is the phase 0 gate.
 
-- [ ] **Step 5: Verify the gate** (`superpowers:verification-before-completion`). Check that all of these hold: the CI run URL is green, `make smoke` prints the three rows, `docs/benchmarks/phase0-memory.md` holds the measured values, and the ROADMAP points at phase 1.
+- [x] **Step 5: Verify the gate** (`superpowers:verification-before-completion`). Check that all of these hold: the CI run URL is green, `make smoke` prints the three rows, `docs/benchmarks/phase0-memory.md` holds the measured values, and the ROADMAP points at phase 1.
